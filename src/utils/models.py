@@ -19,6 +19,8 @@ from django.conf import settings
 from hvad.models import TranslatableModel, TranslatedFields
 from utils.shared import get_ip_address
 from utils.importers.up import get_input_value_by_name
+from utils import notify
+
 
 
 LOG_TYPES = [
