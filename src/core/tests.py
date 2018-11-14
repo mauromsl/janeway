@@ -7,11 +7,11 @@ import datetime
 
 from django.test import TestCase
 from django.urls import reverse
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 
 from utils.testing import setup
-from core import models
-
+from core import models, validators
 
 class CoreTests(TestCase):
     """
@@ -67,3 +67,39 @@ class CoreTests(TestCase):
         self.journal_two.name = 'Journal Two'
         call_command('sync_journals_to_sites')
         call_command('install_plugins')
+
+class TestValidators(TestCase):
+
+    def test_valid_file(self):
+        valid_extensions = {".gz"}
+        valid_mimetypes = {"application/x-tar"}
+        validator = validators.FileTypeValidator()
+        file_ = SimpleUploadedFile("test.tar.gz", content=None)
+        try:
+            validator(file_)
+        except ValidationError as e:
+            error = e
+        else:
+            error = None
+
+        self.assertIsNone(error)
+
+    def test_invalid_file_extension(self):
+        valid_extensions = {".gz"}
+        valid_mimetypes = {"application/x-tar"}
+        validator = validators.FileTypeValidator()
+        file_ = SimpleUploadedFile("test.tar.bz2")
+
+        with self.assertRaises(ValidationError):
+            validator(file_)
+
+
+    def test_invalid_mime_type(self):
+        valid_extensions = {".gz"}
+        valid_mimetypes = {"application/x-tar"}
+        validator = validators.FileTypeValidator()
+        file_ = SimpleUploadedFile("test.gz")
+
+        with self.assertRaises(ValidationError):
+            validator(file_)
+

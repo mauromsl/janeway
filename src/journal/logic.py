@@ -72,6 +72,7 @@ def list_galleys(article, galleys):
     """
 
     # We should use an HTML galley if it exists, and render an XML one if it does not.
+    import pdb;pdb.set_trace()
     if article.render_galley:
         return article.render_galley.file_content()
 

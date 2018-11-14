@@ -6,6 +6,7 @@ __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
 from importlib import import_module
 import json
+import logging
 
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -1331,7 +1332,6 @@ def plugin_list(request):
         plugins = util_models.Plugin.objects.filter(enabled=True)
     else:
         plugins = util_models.Plugin.objects.filter(enabled=True, press_wide=True)
-
     for plugin in plugins:
         try:
             module_name = "{0}.{1}.plugin_settings".format("plugins", plugin.name)
@@ -1340,7 +1340,8 @@ def plugin_list(request):
                                 'manager_url': getattr(plugin_settings, 'MANAGER_URL', ''),
                                 'name': getattr(plugin_settings, 'PLUGIN_NAME')
                                 })
-        except ImportError:
+        except ImportError as e:
+            logging.critical("Failed to import with exception: {}".format(e))
             pass
 
     template = 'core/manager/plugins.html'
