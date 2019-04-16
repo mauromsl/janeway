@@ -12,6 +12,7 @@ from utils.install import update_settings, update_license
 from submission import models as submission_models
 
 ROLES_RELATIVE_PATH = 'utils/install/roles.json'
+ROLES_RELATIVE_PATH = 'core/fixtures/countries.json'
 
 
 class Command(BaseCommand):
@@ -65,6 +66,8 @@ class Command(BaseCommand):
             print("Installing role fixtures")
             roles_path = os.path.join(settings.BASE_DIR, ROLES_RELATIVE_PATH)
             call_command('loaddata', roles_path)
+            print("Installing Countries")
+            call_command('loaddata', countries_path)
             journal.name = input('Journal #1 name: ')
             journal.description = input('Journal #1 description: ')
             journal.save()
