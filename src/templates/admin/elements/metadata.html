@@ -20,7 +20,11 @@
     </tr>
     <tr>
         <td>{{ article.section.name }}</td>
+        {% if article.correspondence_author %}
         <td>{{ article.correspondence_author.full_name }} <a onclick="return popitup('{% url 'send_user_email_article' article.correspondence_author.pk article.pk %}')"><i class="fa fa-envelope">&nbsp;</i></a></td>
+        {% else %}
+        <td><i class="fa fa-warning">&nbsp;</i> This article has no correspondence_author</td>
+        {% endif %}
         <td>{{ article.license.short_name }}</td>
         <td>{{ article.get_language_display }}</td>
     </tr>
@@ -100,7 +104,7 @@
         {% for f_author in article.frozenauthor_set.all %}
             <tr>
                 <td>{{ f_author.full_name }}</td>
-                <td>{{ f_author.author.email }} <a onclick="return popitup('{% url 'send_user_email' f_author.author.pk %}')"><i class="fa fa-envelope">&nbsp;</i></a></td>
+                <td>{% if f_author.author.email %}{{ f_author.author.email }} <a onclick="return popitup('{% url 'send_user_email' f_author.author.pk %}')"><i class="fa fa-envelope">&nbsp;</i></a>{% else %}No email address recorded.{% endif %}</td>
                 <td>{% if f_author.author == article.correspondence_author %}
                     <i class="fa fa-check-circle" style="color: green;"></i>
                 {% else %}<i class="fa fa-times-circle" style="color: red;"></i>{% endif %}
@@ -131,6 +135,36 @@
         </tr>
     {% endfor %}
 </table>
+
+<div class="title-area">
+    <h2>Projected Issue</h2>
+</div>
+<div class="content">
+    <table class="scroll">
+        <tr>
+            <th>Issue ID</th>
+            <th>Issue Title</th>
+            <th>Volume</th>
+            <th>Number</th>
+            <th>Published</th>
+            <th></th>
+        </tr>
+        {% if article.projected_issue %}
+        <tr>
+            <td>{{ article.projected_issue.id }}</td>
+            <td>{{ article.projected_issue.issue_title }}</td>
+            <td>{{ article.projected_issue.volume }}</td>
+            <td>{{ article.projected_issue.issue }}</td>
+            <td>{{ article.projected_issue.date }}</td>
+            <td><a href="{% url 'manage_issues_id' article.projected_issue.pk %}">Issue Manager</a></td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="6">This article does not have a projected issue. You can <a href="{% url 'review_projected_issue' article.pk %}?return={{ request.path|urlencode }}">assign one</a>.</td>
+        </tr>
+        {% endif %}
+    </table>
+</div>
 
 <div class="title-area">
     <h2>Identifiers</h2>

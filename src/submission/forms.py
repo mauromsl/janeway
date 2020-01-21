@@ -11,6 +11,8 @@ from core import models as core_models
 from identifiers import models as ident_models
 from review.forms import render_choices
 from utils.forms import KeywordModelForm
+from utils import setting_handler
+
 
 
 class PublisherNoteForm(forms.ModelForm):
@@ -48,6 +50,12 @@ class ArticleStart(forms.ModelForm):
             self.fields.pop('copyright_notice')
         else:
             self.fields['copyright_notice'].required = True
+            copyright_label = setting_handler.get_setting(
+                'general',
+                'copyright_submission_label',
+                journal,
+            ).processed_value
+            self.fields['copyright_notice'].label = copyright_label
 
         if not journal.submissionconfiguration.competing_interests:
             self.fields.pop('competing_interests')
@@ -345,11 +353,19 @@ class ConfiguratorForm(forms.ModelForm):
                 'If language is unset you must select a default language.'
             )
 
-
-
-
     class Meta:
         model = models.SubmissionConfiguration
         exclude = (
             'journal',
         )
+
+
+class ProjectedIssueForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(ProjectedIssueForm, self).__init__(*args, **kwargs)
+        self.fields['projected_issue'].queryset = self.instance.journal.issue_set.all()
+
+    class Meta:
+        model = models.Article
+        fields = ('projected_issue',)

@@ -211,6 +211,9 @@ def get_settings_to_edit(group, journal):
              },
             {'name': 'peer_review_info',
              'object': setting_handler.get_setting('general', 'peer_review_info', journal),
+             },
+            {'name': 'copyright_submission_label',
+             'object': setting_handler.get_setting('general', 'copyright_submission_label', journal)
              }
         ]
         setting_group = 'general'
@@ -278,7 +281,7 @@ def get_settings_to_edit(group, journal):
             'enable_editorial_display', 'multi_page_editorial', 'enable_editorial_images', 'main_contact',
             'publisher_name', 'publisher_url',
             'maintenance_mode', 'maintenance_message', 'auto_signature', 'slack_logging', 'slack_webhook',
-            'twitter_handle', 'switch_language', 'google_analytics_code'
+            'twitter_handle', 'switch_language', 'google_analytics_code', 'keyword_list_page',
         ]
 
         settings = process_setting_list(journal_settings, 'general', journal)
@@ -289,6 +292,12 @@ def get_settings_to_edit(group, journal):
             'object': setting_handler.get_setting('email', 'from_address', journal),
         })
 
+    elif group == 'proofing':
+        proofing_settings = [
+            'max_proofreaders'
+        ]
+        settings = process_setting_list(proofing_settings, 'general', journal)
+        setting_group = 'general'
     else:
         settings = []
         setting_group = None
@@ -353,8 +362,7 @@ def handle_article_large_image_file(uploaded_file, article, request):
         new_file = files.overwrite_file(
                 uploaded_file,
                 article.large_image_file,
-                'articles',
-                article.pk
+                ('articles', article.pk)
         )
         article.large_image_file = new_file
         article.save()
@@ -372,8 +380,7 @@ def handle_article_thumb_image_file(uploaded_file, article, request):
         new_file = files.overwrite_file(
                 uploaded_file,
                 article.large_image_file,
-                'articles',
-                article.pk
+                ('articles', article.pk)
         )
         article.thumbnail_image_file = new_file
         article.save()
@@ -655,3 +662,13 @@ def export_gdpr_user_profile(user):
       'is_staff']]
     response = JsonResponse(user_dict)
     return response
+
+
+def get_homepage_elements(request):
+    homepage_elements = models.HomepageElement.objects.filter(
+        content_type=request.model_content_type,
+        object_id=request.site_type.pk,
+        active=True).order_by('sequence')
+    homepage_element_names = [el.name for el in homepage_elements]
+
+    return homepage_elements, homepage_element_names

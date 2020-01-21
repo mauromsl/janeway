@@ -87,7 +87,11 @@ def production_manager_roles(func):
     :return: either the function call or permission denied
     """
 
+
     def wrapper(request, *args, **kwargs):
+        if not base_check(request):
+            return redirect('{0}?next={1}'.format(reverse('core_login'), request.path_info))
+
         if request.user.is_editor(request) or request.user.is_section_editor(request) or request.user.is_production(request):
             return func(request, *args, **kwargs)
 
@@ -105,6 +109,10 @@ def proofing_manager_roles(func):
         """
 
     def wrapper(request, *args, **kwargs):
+
+        if not base_check(request):
+            return redirect('{0}?next={1}'.format(reverse('core_login'), request.path_info))
+
         if request.user.is_editor(request) or request.user.is_section_editor(
                 request) or request.user.is_proofing_manager(request):
             return func(request, *args, **kwargs)
@@ -1082,3 +1090,23 @@ def article_stage_review_required(func):
             return func(request, article_id, *args, **kwargs)
 
     return review_required_wrapper
+
+
+def keyword_page_enabled(func):
+    """
+    Checks that the keyword page is enabled for a given journal.
+    :param func: func
+    :return: PermissionDenied or func
+    """
+
+    def keyword_page_enabled_wrapper(request, *args, **kwargs):
+        if not request.journal.get_setting('general', 'keyword_list_page'):
+            return redirect(
+                reverse(
+                    'website_index',
+                )
+            )
+        else:
+            return func(request, *args, **kwargs)
+
+    return keyword_page_enabled_wrapper

@@ -5,6 +5,7 @@
 {% load foundation %}
 {% load roles %}
 {% load render_string %}
+{% load i18n %}
 
 {% block title %}Proofing - {{ article.pk }}{% endblock title %}
 {% block title-section %}Proofing{% endblock %}
@@ -84,6 +85,9 @@
                                                 {% else %}
                                                     Awaiting<br/>proofreader
                                                 {% endif %}
+                                                {% if request.user.is_admin %}
+                                                        <a class="button expanded" target="_blank" href="{% url 'admin:proofing_proofingassignment_change' task.pk %}"><span class="fa fa-cogs">&nbsp;</span>Edit in Admin</a>
+                                                {% endif %}
                                             </div>
                                         </td>
                                     </tr>
@@ -107,7 +111,8 @@
                                     <th>Due</th>
                                     <th>Galleys</th>
                                     <th>Status</th>
-                                    <th></th>
+                                    <th>Acknowledge</th>
+                                    {% if request.user.is_admin %}<th></th>{% endif %}
                                 </tr>
                                 {% for task in round.typeset_tasks %}
                                     <tr>
@@ -137,6 +142,9 @@
                                                 Awaiting typesetter
                                             {% endif %}
                                         </td>
+                                        {% if request.user.is_admin %}
+                                            <td><a target="_blank" href="{% url 'admin:proofing_typesetterproofingtask_change' task.pk %}"><span class="fa fa-cogs">&nbsp;</span>Edit in Admin</a></td>
+                                        {% endif %}
                                     </tr>
                                     {% empty %}
                                     <tr>
@@ -162,10 +170,10 @@
                         <th>Label</th>
                         <th width="25%">Filename</th>
                         <th>Type</th>
-                        <th>Uploaded</th>
+                        <th>Modified</th>
                         <th>Edit</th>
-                        <th>Download</th>
-                        <th>Replace</th>
+                        <th></th>
+                        <th>Preview</th>
                         <th>History</th>
                         <th>Create PDF</th>
                         <th>Create EPUB</th>
@@ -178,16 +186,16 @@
                             <td>{{ galley.label }}</td>
                             <td>{{ galley.file.original_filename|truncatechars:40 }}</td>
                             <td>Galley</td>
-                            <td>{{ galley.file.date_uploaded|date:"Y-m-d G:i" }}</td>
+                            <td>{{ galley.file.date_modified|date:"Y-m-d G:i" }}</td>
                             <td><a href="{% url 'pm_edit_galley' article.pk galley.pk %}" class="fa fa-edit"></a></td>
                             <td>{% if can_view_file_flag %}
                                 <a href="{% url 'article_file_download' 'id' article.pk galley.file.pk %}"><i
                                         class="fa fa-download">&nbsp;</i></a>{% endif %}
                             </td>
-                            <td>{% if can_edit_file_flag %}
-                                <a href="{% url 'article_file_replace' 'id' article.pk galley.file.pk %}?return={{ request.path|urlencode }}"><i
-                                        class="fa fa-cloud-upload">&nbsp;</i></a>{% endif %}
-                            </td>
+                            <td>
+                                <a href="{% url 'production_preview_galley' article.pk galley.pk %}" target="_blank">
+                                    <i class="fa fa-eye">&nbsp;</i>
+                                </a>
                             <td>{% if can_view_file_history_flag %}
                                 <a href="{% url 'file_history' article.pk galley.file.pk %}?return={{ request.path|urlencode }}"><i
                                         class="fa fa-history">
@@ -255,6 +263,16 @@
             </div>
             <div class="content">
             {% render_string journal_settings.general.proofing_steps %}</div>
+
+            {% if not journal_settings.general.max_proofreaders.processed_value %}
+                <div class="title-area">
+                    <h2>Notes</h2>
+                </div>
+                <div class="content">
+                    <p>{% trans "Each proofing round is limited to" %} {{ journal_settings.general.max_proofreaders }} {% trans "proofreaders" %}.</p>
+                </div>
+            {% endif %}
+
         </div>
         <div class="box">
             <div class="title-area">

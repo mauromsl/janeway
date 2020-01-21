@@ -1,12 +1,15 @@
 <div class="card">
     <div class="card-divider">
-        <h4>{{ article.title|safe }}</h4>
+        <h4>{{ article.pk }} - {{ article.title|safe }}</h4>
     </div>
     <div class="card-section">
         {% if type == "assignment" %}
             <p>Awaiting proofing manager assignment.</p>
         {% elif type == "assigned" %}
             <p>Proofing in progress.</p>
+        {% endif %}
+        {% if article.projected_issue %}
+            <p><strong>Projected Issue:</strong> {{ article.projected_issue.display_title }}</p>
         {% endif %}
         <div class="button-group">
             {% if type == "assignment" %}

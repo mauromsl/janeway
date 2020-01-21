@@ -335,8 +335,8 @@ class Article(models.Model):
                                               null=True, on_delete=models.SET_NULL)
 
     competing_interests_bool = models.BooleanField(default=False)
-    competing_interests = models.TextField(blank=True, null=True, help_text="If you have any competing or conflict"
-                                                                            "of insterests in the publication of this "
+    competing_interests = models.TextField(blank=True, null=True, help_text="If you have any conflict "
+                                                                            "of interests in the publication of this "
                                                                             "article please state them here.")
 
     # Files
@@ -400,7 +400,19 @@ class Article(models.Model):
     ithenticate_score = models.IntegerField(blank=True, null=True)
 
     # Primary issue, allows the Editor to set the Submission's primary Issue
-    primary_issue = models.ForeignKey('journal.Issue', blank=True, null=True, on_delete=models.SET_NULL)
+    primary_issue = models.ForeignKey(
+        'journal.Issue', 
+        blank=True,
+        null=True, 
+        on_delete=models.SET_NULL,
+    )
+    projected_issue = models.ForeignKey(
+        'journal.Issue', 
+        blank=True, 
+        null=True, 
+        on_delete=models.SET_NULL,
+        related_name='projected_issue',
+    )
 
     # Meta
     meta_image = models.ImageField(blank=True, null=True, upload_to=article_media_upload, storage=fs)
@@ -1044,6 +1056,13 @@ class Article(models.Model):
             return self.productionassignment
         except ObjectDoesNotExist:
             return None
+
+    @property
+    def citation_count(self):
+        article_link_count = self.articlelink_set.all().count()
+        book_link_count = self.booklink_set.all().count()
+
+        return article_link_count + book_link_count
 
 
 class FrozenAuthor(models.Model):
