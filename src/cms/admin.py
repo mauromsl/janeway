@@ -9,6 +9,9 @@ from cms import models
 admin_list = [
     (models.NavigationItem,),
     (models.Page,),
+    (models.HTMLBlock,),
+    (models.CMSPage,), #TODO: Add Fixture and remove this before pushing!!
+    (models.CustomPage,),
 ]
 
 [admin.site.register(*t) for t in admin_list]

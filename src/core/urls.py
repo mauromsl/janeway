@@ -16,6 +16,7 @@ include('events.registration')
 
 urlpatterns = [
     url(r'^$', press_views.index, name='website_index'),
+    url(r'^home_new$', press_views.index_new, name='website_index_new'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^summernote/', include('django_summernote.urls')),
     url(r'', include('core.include_urls')),

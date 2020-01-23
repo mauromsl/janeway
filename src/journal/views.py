@@ -16,7 +16,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.urls import reverse
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Prefetch
 from django.http import Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
@@ -46,6 +46,25 @@ from utils.logger import get_logger
 from events import logic as event_logic
 
 logger = get_logger(__name__)
+
+
+@has_journal
+def home_new(request):
+    """ Renders a journal homepage.
+
+    :param request: the request associated with this call
+    :return: a rendered template of the journal homepage
+    """
+    page = cms_models.CMSPage.objects.prefetch_related(
+        Prefetch("blocks", cms_models.CMSBlock.objects.select_subclasses())
+    ).get(title="home")
+    template = 'journal/index_new.html'
+    context = {
+                "page": page,
+                "blocks": page.blocks.all(),
+            }
+
+    return render(request, template, context)
 
 
 @has_journal

@@ -26,6 +26,17 @@ from utils import install
 from utils.logic import get_janeway_version
 
 
+def index_new(request):
+    """
+    Press index page, displays blocks of HomepageElement objects
+    :param request: HttpRequest object
+    :return: HttpResponse object or journal_views.home if there is a request,journal
+    """
+    if request.journal is not None:
+        # if there's a journal, then we render the _journal_ homepage, not the press
+        return journal_views.home_new(request)
+
+
 def index(request):
     """
     Press index page, displays blocks of HomepageElement objects
