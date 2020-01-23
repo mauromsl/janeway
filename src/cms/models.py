@@ -11,14 +11,43 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.template.loader import get_template
 
+from utils import model_utils
 from utils.logic import build_url_for_request
 
+from model_utils.managers import InheritanceManager
 
-class BaseBlock():
-    """ A Base class for implementing CMS blocks """
+
+class CMSPage(model_utils.SiteRelationMixin, models.Model):
+    title = models.CharField(max_length=300,
+        help_text="Page name displayed at the top of the page",
+    )
+    builtin = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('journal', 'press', 'title')
+
+
+class CustomPage(CMSPage):
+
+    def get_queryset(self):
+        return super(CustomPage, self).get_queryset().filter(builtin=False)
+
+    class Meta:
+        proxy = True
+
+
+class CMSBlock(models.Model):
+    """ An abstract class for implementing CMS blocks """
+    objects = InheritanceManager()
     TEMPLATE = None
     # A page is divided in 12 columns
-    ALLOWED_COLUMNS = [12]
+    ALLOWED_COLUMNS = ((4, "1/4"), (6, "1/2"), (8, "2/3"), (12, "1"))
+
+    columns = models.PositiveIntegerField(blank=True, null=True, choices=ALLOWED_COLUMNS)
+    page = models.ForeignKey("cms.CMSPage",
+        on_delete=models.CASCADE,
+        related_name="blocks",
+    )
 
     def render(self, loader=None):
         if loader is None:
@@ -32,37 +61,14 @@ class BaseBlock():
         """ The context required to render this block"""
         return {}
 
-    columns = models.PositiveIntegerField(blank=True, null=True, choices=ALLOWED_COLUMNS)
-    page = models.ForeignKey("cms.CMSPage",
-        on_delete=models.CASCADE, blank=True, null=True)
 
-
-class HTMLBlock(BaseBlock):
-    TEMPLATE = "cms/html_block.html"
-    ALLOWED_COLUMNS = [1, 3, 4, 6, 8, 12]
-
-    content = models.TextField()
+class HTMLBlock(CMSBlock):
+    TEMPLATE = 'cms/blocks/html_block.html'
+    content = models.TextField(null=True, blank=True)
 
     @property
     def context(self):
         return {"content": self.content}
-
-
-class CMSPage(models.Model):
-    press = models.ForeignKey("press.Press",
-        on_delete=models.CASCADE, blank=True, null=True)
-    journal = models.ForeignKey("journal.Journal",
-        on_delete=models.CASCADE, blank=True, null=True)
-
-    @property
-    def site(self):
-        return self.journal or self.press
-
-    def save(self, *args, **kwargs):
-        if bool(self.press) ^ bool(self.journal):
-            raise ValueError("One and one only of journal/press can be set")
-        super().save(*args, **kwargs)
-
 
 class Page(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='page_content', null=True)
