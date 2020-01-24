@@ -3,12 +3,15 @@ __author__ = "Birkbeck Centre for Technology and Publishing"
 __license__ = "AGPL v3"
 __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
-
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.db.models import Q
 from django.template.loader import get_template
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from model_utils.managers import InheritanceManager
+
 
 class CMSBlock(models.Model):
     """ An abstract class for implementing CMS blocks """
@@ -59,3 +62,25 @@ class AboutBlock(CMSBlock):
         }
 
 
+class NewsBlock(CMSBlock):
+    TEMPLATE = 'cms/blocks/news_block.html'
+    total_articles = models.PositiveIntegerField(
+            default=1,
+            help_text="Maximum number of news articles to render",
+    )
+
+    @property
+    def context(self):
+        from comms import models as comms_models
+        if self.page.journal:
+            content_type = ContentType.objects.get_for_model(self.page.journal)
+        else:
+            content_type = ContentType.objects.get_for_model(self.page.press)
+
+        news_items = comms_models.NewsItem.objects.filter(
+            (Q(content_type=content_type) & Q(object_id=self.page.site.pk)) &
+            (Q(start_display__lte=timezone.now()) | Q(start_display=None)) &
+            (Q(end_display__gte=timezone.now()) | Q(end_display=None))
+        ).order_by('-posted')[:self.total_articles]
+
+        return {"news_items":news_items}

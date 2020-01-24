@@ -11,6 +11,7 @@ admin_list = [
     (models.Page,),
     (models.HTMLBlock,),
     (models.AboutBlock,),
+    (models.NewsBlock,),
     (models.CMSPage,), #TODO: Add Fixture and remove this before pushing!!
     (models.CustomPage,),
 ]
