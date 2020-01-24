@@ -8,6 +8,7 @@ from cms.models.blocks import (
     HTMLBlock,
     AboutBlock,
     NewsBlock,
+    FeaturedJournalsBlock,
 )
 
 from cms.models.page import (
@@ -26,6 +27,7 @@ __all__ = {
     "HTMLBlock",
     "AboutBlock",
     "NewsBlock",
+    "FeaturedJournalsBlock",
 
     "CMSPage",
     "CustomPage",

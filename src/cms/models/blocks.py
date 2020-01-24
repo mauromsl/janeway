@@ -3,6 +3,8 @@ __author__ = "Birkbeck Centre for Technology and Publishing"
 __license__ = "AGPL v3"
 __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
+import random
+
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import Q
@@ -84,3 +86,31 @@ class NewsBlock(CMSBlock):
         ).order_by('-posted')[:self.total_articles]
 
         return {"news_items":news_items}
+
+
+class FeaturedJournalsBlock(CMSBlock):
+    TEMPLATE = 'cms/blocks/featured_journals_block.html'
+    use_random_journals = models.BooleanField(default=False)
+    featured_journals = models.ManyToManyField('journal.Journal',
+        null=True,
+        blank=True,
+    )
+
+    @property
+    def random_journals(self):
+        if self.page.press:
+            journals = set(self.page.press.journals())
+        elif self.page.journal:
+            journals = set(self.page.journal.press.journals())
+
+        sample_size = min(6, len(journals))
+        return random.sample(journals, sample_size)
+
+    @property
+    def context(self):
+        if self.use_random_journals:
+            journals = self.random_journals
+        else:
+            journals = self.featured_journals.all()
+
+        return {"featured_journals": journals}
