@@ -1,5 +1,5 @@
 __copyright__ = "Copyright 2017 Birkbeck, University of London"
-__author__ = "Martin Paul Eve & Andy Byers"
+__author__ = "Birkbeck Centre for Technology and Publishing"
 __license__ = "AGPL v3"
 __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
@@ -7,83 +7,10 @@ __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.template.loader import get_template
 
-from utils import model_utils
 from utils.logic import build_url_for_request
-
-from model_utils.managers import InheritanceManager
-
-
-class CMSPage(model_utils.SiteRelationMixin, models.Model):
-    title = models.CharField(max_length=300,
-        help_text="Page name displayed at the top of the page",
-    )
-    builtin = models.BooleanField(default=False)
-
-    class Meta:
-        unique_together = ('journal', 'press', 'title')
-
-
-class CustomPage(CMSPage):
-
-    def get_queryset(self):
-        return super(CustomPage, self).get_queryset().filter(builtin=False)
-
-    class Meta:
-        proxy = True
-
-
-class CMSBlock(models.Model):
-    """ An abstract class for implementing CMS blocks """
-    objects = InheritanceManager()
-    TEMPLATE = None
-    # A page is divided in 12 columns
-    ALLOWED_COLUMNS = ((4, "1/4"), (6, "1/2"), (8, "2/3"), (12, "1"))
-
-    columns = models.PositiveIntegerField(blank=True, null=True, choices=ALLOWED_COLUMNS)
-    page = models.ForeignKey("cms.CMSPage",
-        on_delete=models.CASCADE,
-        related_name="blocks",
-    )
-
-    def render(self, loader=None):
-        if loader is None:
-            template = get_template(self.TEMPLATE)
-        else:
-            template = loader.get_template(self.TEMPLATE)
-        return template.render(context=self.context)
-
-    @property
-    def context(self):
-        """ The context required to render this block"""
-        return {}
-
-
-class HTMLBlock(CMSBlock):
-    TEMPLATE = 'cms/blocks/html_block.html'
-    content = models.TextField(null=True, blank=True)
-
-    @property
-    def context(self):
-        return {"content": self.content}
-
-
-class AboutBlock(CMSBlock):
-    TEMPLATE = 'cms/blocks/about_block.html'
-    title = models.CharField(
-        max_length=300,
-        help_text="Title to be displayed above the journal description"
-    )
-
-    @property
-    def context(self):
-        return {
-            'title': self.title,
-        }
 
 
 class Page(models.Model):
