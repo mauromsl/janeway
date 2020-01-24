@@ -1,0 +1,25 @@
+{% extends "core/base.html" %}
+{% load truncate %}
+
+{% block body %}
+
+    {% for block in blocks %}
+    <div class="col-md-{{ block.columns }}">
+        {{ block.render }}
+    </div>
+    {% endfor %}
+
+{% endblock body %}
+
+{% block js %}
+    <script>
+        $(document).ready(function () {
+            $('.carousel.carousel-slider').carousel({fullWidth: true});
+        })
+        $('.carousel').carousel();
+        setInterval(function () {
+            $('.carousel').carousel('next');
+        }, 8000);
+    </script>
+
+{% endblock %}

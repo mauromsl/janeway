@@ -7,6 +7,7 @@ __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.template.loader import get_template
@@ -69,6 +70,21 @@ class HTMLBlock(CMSBlock):
     @property
     def context(self):
         return {"content": self.content}
+
+
+class AboutBlock(CMSBlock):
+    TEMPLATE = 'cms/blocks/about_block.html'
+    title = models.CharField(
+        max_length=300,
+        help_text="Title to be displayed above the journal description"
+    )
+
+    @property
+    def context(self):
+        return {
+            'title': self.title,
+        }
+
 
 class Page(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='page_content', null=True)

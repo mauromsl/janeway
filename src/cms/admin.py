@@ -10,6 +10,7 @@ admin_list = [
     (models.NavigationItem,),
     (models.Page,),
     (models.HTMLBlock,),
+    (models.AboutBlock,),
     (models.CMSPage,), #TODO: Add Fixture and remove this before pushing!!
     (models.CustomPage,),
 ]
