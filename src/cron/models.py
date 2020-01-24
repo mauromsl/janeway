@@ -10,7 +10,6 @@ from django.db.models import Q
 from datetime import timedelta
 
 from cron import logic
-from journal import models as journal_models
 from utils import render_template, notify_helpers
 
 
@@ -23,7 +22,7 @@ class CronTask(models.Model):
 
     email_to = models.EmailField(blank=True, null=True)
     email_subject = models.CharField(max_length=255, blank=True, null=True)
-    email_journal = models.ForeignKey(journal_models.Journal, blank=True, null=True)
+    email_journal = models.ForeignKey("journal.Journal", blank=True, null=True)
     email_html = models.TextField(blank=True, null=True)
     email_cc = models.CharField(max_length=255, blank=True, null=True)
     email_bcc = models.CharField(max_length=255, blank=True, null=True)
