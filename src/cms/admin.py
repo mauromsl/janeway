@@ -13,6 +13,8 @@ admin_list = [
     (models.AboutBlock,),
     (models.NewsBlock,),
     (models.FeaturedJournalsBlock,),
+    (models.FeaturedArticlesBlock,),
+    (models.CMSFeaturedArticle,),
     (models.CMSPage,), #TODO: Add Fixture and remove this before pushing!!
     (models.CustomPage,),
 ]

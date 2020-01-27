@@ -7,12 +7,13 @@ import random
 
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, Max
 from django.template.loader import get_template
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-
 from model_utils.managers import InheritanceManager
+
+from utils.logic import get_current_request
 
 
 class CMSBlock(models.Model):
@@ -114,3 +115,60 @@ class FeaturedJournalsBlock(CMSBlock):
             journals = self.featured_journals.all()
 
         return {"featured_journals": journals}
+
+
+class FeaturedArticlesBlock(CMSBlock):
+    TEMPLATE = 'cms/blocks/featured_articles_block.html'
+    featured_articles= models.ManyToManyField('submission.Article',
+        through="cms.CMSFeaturedArticle",
+        null=True,
+        blank=True,
+    )
+
+
+    @property
+    def context(self):
+        return {
+            "featured_articles": self.featured_articles.all(
+            ).order_by("cmsfeaturedarticle__sequence")
+        }
+
+
+def get_user_from_request():
+    request = get_current_request()
+    if request and request.user and request.user.is_authenticated:
+        return request.user
+    return None
+
+
+class CMSFeaturedArticle(models.Model):
+    article = models.ForeignKey("submission.Article")
+    cms_block = models.ForeignKey("cms.FeaturedArticlesBlock")
+    sequence = models.PositiveIntegerField(blank=True, null=True)
+    added = models.DateTimeField(default=timezone.now)
+    added_by = models.ForeignKey('core.Account',
+            default=get_user_from_request,
+            null=True, blank=True,
+    )
+
+
+    class Meta:
+        unique_together = ("article", "cms_block")
+
+    @property
+    def next_sequence(self):
+        last_sequence = self.__class__.objects.filter(
+            article=self.article,
+            cms_block=self.cms_block,
+        ).aggregate(Max("sequence"))["sequence__max"]
+        if last_sequence is None:
+            return 1
+        else:
+            return last_sequence + 1
+
+
+    def save(self, *args, **kwargs):
+        if not self.sequence:
+            self.sequence = self.next_sequence
+        super().save(*args, **kwargs)
+
