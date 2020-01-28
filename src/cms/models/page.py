@@ -12,6 +12,28 @@ class CMSPage(model_utils.SiteRelationMixin, models.Model):
     class Meta:
         unique_together = ('journal', 'press', 'title')
 
+    @property
+    def end_row_indexes(self):
+        """ Set of indexes at which a row of blocks should be terminated"""
+        total_blocks = self.blocks.count()
+        indexes = set()
+        columns = 0
+        for idx, block in enumerate(self.blocks.all().order_by("sequence")):
+            columns += block.columns
+            if columns == 12:
+                indexes.add(idx)
+                columns = 0
+            elif columns > 12:
+                #row overflow
+                indexes.add(idx - 1)
+                columns = block.columns
+
+        # Handle last block not filling 12 columns
+        if total_blocks > 0:
+            indexes.add(idx)
+
+        return indexes
+
 
 class CustomPage(CMSPage):
 
