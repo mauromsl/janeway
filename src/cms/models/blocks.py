@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from model_utils.managers import InheritanceManager
 
+from utils import setting_handler
 from utils.logic import get_current_request
 
 
@@ -24,6 +25,7 @@ class CMSBlock(models.Model):
     ALLOWED_COLUMNS = ((4, "1/4"), (6, "1/2"), (8, "2/3"), (12, "1"))
 
     columns = models.PositiveIntegerField(blank=True, null=True, choices=ALLOWED_COLUMNS)
+    sequence = models.PositiveIntegerField()
     page = models.ForeignKey("cms.CMSPage",
         on_delete=models.CASCADE,
         related_name="blocks",
@@ -41,6 +43,24 @@ class CMSBlock(models.Model):
         """ The context required to render this block"""
         return {}
 
+    @property
+    def next_sequence(self):
+        last_sequence = self.__class__.objects.filter(
+            article=self.article,
+            cms_block=self.cms_block,
+        ).aggregate(Max("sequence"))["sequence__max"]
+        if last_sequence is None:
+            return 1
+        else:
+            return last_sequence + 1
+
+
+    def save(self, *args, **kwargs):
+        if not self.sequence:
+            self.sequence = self.next_sequence
+        super().save(*args, **kwargs)
+
+
 
 class HTMLBlock(CMSBlock):
     TEMPLATE = 'cms/blocks/html_block.html'
@@ -49,6 +69,10 @@ class HTMLBlock(CMSBlock):
     @property
     def context(self):
         return {"content": self.content}
+
+    class Meta:
+        verbose_name="HTML Block"
+        verbose_name_plural="HTML Blocks"
 
 
 class AboutBlock(CMSBlock):
@@ -62,7 +86,14 @@ class AboutBlock(CMSBlock):
     def context(self):
         return {
             'title': self.title,
+            'about_content':  setting_handler.get_setting(
+                'general', 'journal_description', self.page.journal
+            ).value,
         }
+
+    class Meta:
+        verbose_name="About Block"
+        verbose_name_plural="About Blocks"
 
 
 class NewsBlock(CMSBlock):
@@ -87,6 +118,10 @@ class NewsBlock(CMSBlock):
         ).order_by('-posted')[:self.total_articles]
 
         return {"news_items":news_items}
+
+    class Meta:
+        verbose_name="News Block"
+        verbose_name_plural="News Blocks"
 
 
 class FeaturedJournalsBlock(CMSBlock):
@@ -115,6 +150,10 @@ class FeaturedJournalsBlock(CMSBlock):
             journals = self.featured_journals.all()
 
         return {"featured_journals": journals}
+
+    class Meta:
+        verbose_name="Featured Journals Block"
+        verbose_name_plural="Featured Journals Blocks"
 
 
 class FeaturedArticlesBlock(CMSBlock):
