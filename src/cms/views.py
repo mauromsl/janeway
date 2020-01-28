@@ -75,6 +75,13 @@ def index(request):
     return render(request, template, context)
 
 
+def edit_cms_page(request, page_id=None):
+    template = "cms/home_page.html"
+    blocks = models.CMSBlock.objects.select_subclasses().all()
+    context = {"blocks": blocks}
+    return render(request, template, context)
+
+
 def view_page(request, page_name):
     """
     Displays an individual CMS page using either the journal or press page template.

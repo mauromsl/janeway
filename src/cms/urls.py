@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^$', views.index, name='cms_index'),
     url(r'^page/new/$', views.page_manage, name='cms_page_new'),
     url(r'^page/(?P<page_id>\d+)/$', views.page_manage, name='cms_page_edit'),
+    url(r'^cmspage/new/$', views.edit_cms_page, name='new_cms_page'),
     url(r'^(?P<page_name>w+?)$', views.view_page, name='cms_page'),
 
     url(r'^nav/$', views.nav, name='cms_nav'),

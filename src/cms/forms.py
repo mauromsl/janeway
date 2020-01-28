@@ -22,6 +22,16 @@ class PageForm(forms.ModelForm):
 
         self.fields['content'].widget = SummernoteWidget()
 
+class CMSPageForm(forms.ModelForm):
+
+    class Meta:
+        model = models.CMSPage
+        exclude = ('journal', 'press')
+
+    def __init__(self, *args, **kwargs):
+        if 'request' in kwargs:
+            import pdb;pdb.set_trace()
+        super(PageForm, self).__init__(*args, **kwargs)
 
 class NavForm(forms.ModelForm):
 
