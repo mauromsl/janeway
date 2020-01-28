@@ -5,7 +5,7 @@
 <div class="row">
     {% with page.end_row_indexes as indexes %}
       {% for block in blocks %}
-      <div class="col-md-{{ block.columns }}">
+      <div class="col m{{ block.columns }} row-eq-height">
         {{ block.render }}
       </div>
         {% if forloop.counter0 in indexes%}

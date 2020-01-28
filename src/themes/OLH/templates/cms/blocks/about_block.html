@@ -5,7 +5,8 @@
     <div class="row" id="about_journal">
         <div class="large-12 columns">
             <h2>{{ title }}</h2>
-            <p>{{ journal_settings.general.journal_description|safe }}</p>
+            <p>{{ about_content|safe }}</p>
+            <p>{{journal_settings}}</p>
         </div>
     </div>
     {% if request.press_cover %}<div class="figure">{% svg request.press_cover %}</div>{% endif %}

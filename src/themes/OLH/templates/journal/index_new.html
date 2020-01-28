@@ -2,21 +2,14 @@
 {% load truncate %}
 
 {% block body %}
-<div class="row">
-    {% with page.end_row_indexes as indexes %}
-      {% for block in blocks %}
-      <div class="col-md-{{ block.columns }}">
+<div >
+    {% for block in blocks %}
+    <div class="columns medium-{{ block.columns }}">
         {{ block.render }}
-      </div>
-        {% if forloop.counter0 in indexes%}
+    </div>
+    {% endfor %}
 </div>
-          {% if not forloop.last %}
-<div class="row">
-          {% endif %}
-        {% endif %}
-      {% endfor %}
-    {% endwith %}
-</div>
+<div class="row"></div>
 
 {% endblock body %}
 
