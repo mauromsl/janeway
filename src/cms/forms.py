@@ -8,9 +8,13 @@ from django import forms
 from django.apps import apps
 from django.http import Http404
 
+from ajax_select import register, LookupChannel
+from ajax_select.fields import AutoCompleteSelectMultipleField
+from django.db.models import Q
 from django_summernote.widgets import SummernoteWidget
 
 from cms import models
+from submission import models as submission_models
 
 
 class PageForm(forms.ModelForm):
@@ -77,8 +81,39 @@ class FeaturedJournalsBlockForm(CMSBlockForm):
 
 
 class FeaturedArticlesBlockForm(CMSBlockForm):
+    featured_articles = AutoCompleteSelectMultipleField('articles')
+
     class Meta(CMSBlockForm.Meta):
         model = models.FeaturedArticlesBlock
+
+    def save(self, commit=True, *args, **kwargs):
+        instance = super().save(commit=False)
+        featured_articles = self.cleaned_data.pop("featured_articles", [])
+
+        if commit == True:
+            instance.save()
+            for seq, article in enumerate(featured_articles, start=1):
+                related, _ = models.CMSFeaturedArticle.objects.get_or_create(
+                    article=article,
+                    cms_block=instance,
+                )
+                related.sequence = seq
+                related.save()
+
+
+
+@register("articles")
+class FeaturedArticleLookup(LookupChannel):
+    model = submission_models.Article
+    def get_query(self, query_term, request):
+        articles = self.model.objects.filter(stage="Published")
+        if request.journal:
+            articles = articles.filter(journal=request.journal)
+        search_filter = (
+                Q(pk__contains=query_term if query_term.isdigit() else 0)
+                | Q(title__icontains=query_term))
+        return articles.filter(search_filter)
+
 
 
 def prepare_cms_forms(cms_blocks):

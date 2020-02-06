@@ -4,7 +4,9 @@ __license__ = "AGPL v3"
 __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
 
-from django.conf.urls import url
+from ajax_select import urls as ajax_select_urls
+from django.conf.urls import url, include
+
 
 from cms import views
 
@@ -18,4 +20,6 @@ urlpatterns = [
 
     url(r'^nav/$', views.nav, name='cms_nav'),
     url(r'^nav/(?P<nav_id>\d+)/$', views.nav, name='cms_nav_edit'),
+
+    url(r'^ajax_select/', include(ajax_select_urls)),
 ]

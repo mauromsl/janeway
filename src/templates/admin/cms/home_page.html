@@ -69,6 +69,7 @@
         <form method="post" name="{{ block_model|class_name }}">
             {% csrf_token %}
             <h3> {{ block_model|verbose_name}} Options </h3>
+            {{ block_form.media.css }}
             {{ block_form }}
             <input type="hidden" name="block" value="{{ block_model|class_name }}">
             <button type="submit" class="success button">Save</button>
@@ -97,6 +98,9 @@
         $("#active").disableSelection();
     </script>
     {% include "elements/jqte.html" %}
+    {% for _, form in forms %}
+      {{ form.media.js }}
+    {% endfor %}
 {% endblock js %}
 
 
