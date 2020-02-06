@@ -61,7 +61,7 @@ def home_new(request):
     template = 'journal/index_new.html'
     context = {
                 "page": page,
-                "blocks": page.blocks.all(),
+                "blocks": page.blocks.all().order_by("sequence"),
             }
 
     return render(request, template, context)
