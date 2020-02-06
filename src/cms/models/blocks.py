@@ -22,7 +22,7 @@ class CMSBlock(models.Model):
     objects = InheritanceManager()
     TEMPLATE = None
     # A page is divided in 12 columns
-    ALLOWED_COLUMNS = ((4, "1/4"), (6, "1/2"), (8, "2/3"), (12, "1"))
+    ALLOWED_COLUMNS = ((4, "1/3"), (6, "1/2"), (8, "2/3"), (12, "1"))
 
     columns = models.PositiveIntegerField(blank=True, null=True, choices=ALLOWED_COLUMNS)
     sequence = models.PositiveIntegerField()

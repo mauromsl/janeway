@@ -75,10 +75,22 @@ def index(request):
     return render(request, template, context)
 
 
-def edit_cms_page(request, page_id=None):
+def edit_cms_page(request, title="home"):
     template = "cms/home_page.html"
-    blocks = models.CMSBlock.objects.select_subclasses().all()
-    context = {"blocks": blocks}
+    if request.journal:
+        page = get_object_or_404(models.CMSPage, journal=request.journal, title=title)
+    else:
+        page = get_object_or_404(models.CMSPage, press=request.press, title=title)
+
+    prepared_forms = forms.prepare_cms_forms(page.blocks.select_subclasses())
+
+    if "block" in request.POST:
+        forms.save_cms_block(prepared_forms, request.POST)
+
+    context = {
+        "structure": page.get_structure(select_subclasses=True),
+        "forms": prepared_forms.items(),
+    }
     return render(request, template, context)
 
 

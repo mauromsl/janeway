@@ -5,6 +5,8 @@ __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
 
 from django import forms
+from django.apps import apps
+from django.http import Http404
 
 from django_summernote.widgets import SummernoteWidget
 
@@ -30,8 +32,7 @@ class CMSPageForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         if 'request' in kwargs:
-            import pdb;pdb.set_trace()
-        super(PageForm, self).__init__(*args, **kwargs)
+            super(PageForm, self).__init__(*args, **kwargs)
 
 class NavForm(forms.ModelForm):
 
@@ -48,3 +49,67 @@ class NavForm(forms.ModelForm):
             object_id=request.site_type.pk,
             has_sub_nav=True,
         )
+
+
+class CMSBlockForm(forms.ModelForm):
+    class Meta:
+        exclude = ('page', 'sequence')
+
+
+class AboutBlockForm(CMSBlockForm):
+    class Meta(CMSBlockForm.Meta):
+        model = models.AboutBlock
+
+
+class HTMLBlockForm(CMSBlockForm):
+    class Meta(CMSBlockForm.Meta):
+        model = models.HTMLBlock
+
+
+class NewsBlockForm(CMSBlockForm):
+    class Meta(CMSBlockForm.Meta):
+        model = models.NewsBlock
+
+
+class FeaturedJournalsBlockForm(CMSBlockForm):
+    class Meta(CMSBlockForm.Meta):
+        model = models.FeaturedJournalsBlock
+
+
+class FeaturedArticlesBlockForm(CMSBlockForm):
+    class Meta(CMSBlockForm.Meta):
+        model = models.FeaturedArticlesBlock
+
+
+def prepare_cms_forms(cms_blocks):
+    prepared_forms = dict(CMS_BLOCK_FORMS)
+    for block in cms_blocks:
+        form = prepared_forms.get(block.__class__)
+        if form:
+            prepared_forms[block.__class__] = form(instance=block)
+
+    return prepared_forms
+
+
+def save_cms_block(prepared_forms, new_data):
+    model = apps.get_model(app_label="cms", model_name=new_data["block"])
+    form = prepared_forms.get(model)
+    if model not in prepared_forms:
+        raise Http404()
+
+    # TODO: There must be a way of updating the form without reinstantiating...
+    form = form.__class__(new_data, instance=form.instance)
+    prepared_forms[model] = form
+    return form.save()
+
+
+CMS_BLOCK_FORMS = {
+    form.Meta.model: form
+    for form in (
+        AboutBlockForm,
+        HTMLBlockForm,
+        NewsBlockForm,
+        FeaturedJournalsBlockForm,
+        FeaturedArticlesBlockForm,
+    )
+}

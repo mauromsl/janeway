@@ -34,6 +34,39 @@ class CMSPage(model_utils.SiteRelationMixin, models.Model):
 
         return indexes
 
+    @property
+    def structure(self):
+        return self.get_structure()
+
+    def get_structure(self, select_subclasses=False):
+        """ GenExp that yields the blocks of this page in column-based rows
+        e.g:
+            >>> [12, 6, 12, 6, 6, 4, 4, 4, 12, 7]
+            [[12], [6],[12], [6, 6], [4,4,4],[12], [7]]
+        """
+        blocks = self.blocks.all().order_by("sequence")
+        if select_subclasses:
+            blocks = self.blocks.select_subclasses().order_by("sequence")
+        columns = 0
+        row = []
+
+        for block in blocks:
+            filled, columns = self.check_row(columns, row, block)
+            if filled:
+                yield row
+                row = [block]
+            else:
+                row.append(block)
+        yield row
+
+
+    @staticmethod
+    def check_row(columns, row, block):
+        if columns >= 12 or columns + block.columns > 12:
+            return True, block.columns
+        return False, columns + block.columns
+
+
 
 class CustomPage(CMSPage):
 
