@@ -3,10 +3,18 @@
 
 {% block body %}
 <div >
-    {% for block in blocks %}
-    <div class="columns medium-{{ block.columns }}">
-        {{ block.render }}
+    {% for row in page.structure %}
+    {% if row|length > 1%}
+    <div class="row">
+      {% for cms_block in row %}
+        <div class="columns medium-{{ cms_block.columns }}">
+        {{ cms_block.render }}
+        </div>
+      {% endfor%}
     </div>
+    {% else %}
+      {{ row.0.render }}
+    {% endif %}
     {% endfor %}
 </div>
 <div class="row"></div>
