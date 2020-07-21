@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'ajax_select',
 
     # Installed Apps
     'cms',
@@ -170,6 +171,7 @@ SETTINGS_EXPORT = [
     'ENABLE_ENHANCED_MAILGUN_FEATURES',
     'ENABLE_ORCID',
     'DEBUG',
+    'LANGUAGE_CODE',
 ]
 
 WSGI_APPLICATION = 'core.wsgi.application'

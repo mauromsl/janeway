@@ -48,3 +48,5 @@ user-agents==1.0.1
 django-hijack
 geoip2
 django-model-utils
+django-extensions
+django-ajax-selects
