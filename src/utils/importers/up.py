@@ -203,7 +203,7 @@ def import_article(journal, user, url, thumb_path=None, update=False):
                 thumbnail=True,
             )
         except AttributeError:
-            logger.error("Unable to import thumbnail: No id in %s" % url)
+            logger.warning("Unable to import thumbnail: No id in %s" % url)
         except Exception as e:
             logger.warning("Unable to import thumbnail: %s" % e)
 
@@ -420,7 +420,7 @@ def import_issue_images(journal, user, url, import_missing=False, update=False):
     import os
     from django.core.files import File
 
-    for issue in journal.issues().filter(issue_type__code="issue"):
+    for issue in journal.issues.filter(issue_type__code="issue"):
         issue_num = issue.issue
         pattern = re.compile(r'\/\d+\/volume\/{0}\/issue\/{1}'.format(
             issue.volume, issue_num))
@@ -1149,6 +1149,8 @@ def import_issue_articles(soup, issue, user, base_url, import_missing=False, upd
     processed = []
 
     for article_link in articles:
+        if not is_article_block(article_link):
+            continue
         # parse the URL into a DOI and prefix
         article_url = article_link["href"]
         match = pattern.match(article_url)
@@ -1197,6 +1199,17 @@ def import_issue_articles(soup, issue, user, base_url, import_missing=False, upd
             article_order += 1
 
         processed.append(article)
+
+
+def is_article_block(element):
+    """Determines if the given element is an article block
+
+    Article blocks are wrapped in an <li> with class="article-block"
+    These <li> tags are often not closed properly so we can't use them
+    for filtering. Instead we check if the given article link has the thumb
+    class
+    """
+    return element.find("img", src=re.compile(r".*/thumbs/.*"))
 
 
 def extract_date_launched(headers):
