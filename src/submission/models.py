@@ -1032,6 +1032,25 @@ class Article(AbstractLastModifiedModel):
         else:
             return ", ".join([author.full_name() for author in self.authors.all()])
 
+    def bibtex_authors(self):
+        authors = []
+        for author in self.frozen_authors:
+            if author.is_corporate:
+                authors.append("{%s}" author.cor)
+            "%s %s{%s}" % (
+                author.first_name,
+                f"%s. " % (author.middle_name) if author.middle_name else '',
+                author.last_name
+            )
+            for author in self.frozen_authors()
+        )
+
+    def to_bibtex(self):
+        return (
+            '@article{  '
+
+        }"
+
     def can_edit(self, user):
         # returns True if a user can edit an article
         # editing is always allowed when a user is staff
@@ -1465,6 +1484,19 @@ class FrozenAuthor(AbstractLastModifiedModel):
     def __str__(self):
         return self.full_name()
 
+    def bibtex_name(self):
+        if self.is_corporate:
+            return '{%s}' % self.corporate_name
+        else:
+        name_elements = [
+            self.name_prefix,
+            self.first_name,
+            self.middle_name,
+            f"{{self.last_name}}",
+            self.name_suffix
+        ]
+        return " ".join([each for each in name_elements if each])
+
     def full_name(self):
         if self.is_corporate:
             return self.corporate_name
@@ -1476,7 +1508,6 @@ class FrozenAuthor(AbstractLastModifiedModel):
             self.name_suffix
         ]
         return " ".join([each for each in name_elements if each])
-        full_name = u"%s %s" % (self.first_name, self.last_name)
 
     @property
     def dc_name_string(self):
