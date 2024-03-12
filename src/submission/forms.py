@@ -164,7 +164,7 @@ class ArticleInfo(KeywordModelForm, JanewayTranslationModelForm):
                             required=element.required)
                     elif element.kind == 'textarea':
                         self.fields[element.name] = forms.CharField(
-                                widget=TinyMCE(),
+                                widget=forms.Textarea,
                                 required=element.required,
                         )
                     elif element.kind == 'date':

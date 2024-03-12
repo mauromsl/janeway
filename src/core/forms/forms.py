@@ -315,8 +315,12 @@ class GeneratedSettingForm(forms.Form):
 
             if object.setting.types == 'char':
                 self.fields[field['name']] = forms.CharField(widget=forms.TextInput(), required=False)
-            elif object.setting.types == 'rich-text' or object.setting.types == 'text':
-                self.fields[field['name']] = forms.CharField(required=False)
+            elif object.setting.types == 'text':
+                self.fields[field['name']] = forms.CharField(
+                    widget=forms.Textarea(),
+                    required=False,
+                )
+            elif object.setting.types == 'rich-text':
                 self.fields[field['name']] = forms.CharField(
                     widget=TinyMCE(), required=False,
                 )
