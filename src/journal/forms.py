@@ -139,6 +139,12 @@ class IssueDisplayForm(forms.ModelForm):
         )
 
 
+class TopicForm(forms.ModelForm):
+    class Meta:
+        model = journal_models.Topic
+        fields = ('title', 'public_submissions')
+
+
 class BasePrepubNotificationFormSet(forms.BaseFormSet):
 
     def get_form_kwargs(self, index):
