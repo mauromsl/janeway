@@ -861,3 +861,8 @@ ul.menu {
 .key-value-pair.key-above .value .inline-list li:last-child:after {
   content: "";
 }
+
+.topic-row.htmx-swapping {
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
+}
