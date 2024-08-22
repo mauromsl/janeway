@@ -1,0 +1,38 @@
+<script>
+    toastr.options = {
+        "closeButton": true,
+        "debug": true,
+        "newestOnTop": false,
+        "progressBar": true,
+        "positionClass": "toast-bottom-right",
+        "preventDuplicates": false,
+        "onclick": null,
+        "showDuration": "20000",
+        "hideDuration": "3000",
+        "timeOut": "8000",
+        "extendedTimeOut": "60000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    }
+    {% for message in messages %}
+        {% if message.tags == "warning" %}
+            toastr.warning("{{ message|linebreaksbr }}");
+        {% endif %}
+        {% if message.tags == "info" %}
+            toastr.info("{{ message|linebreaksbr }}");
+        {% endif %}
+        {% if message.tags == "danger" %}
+            toastr.error("{{ message|linebreaksbr }}");
+        {% endif %}
+        {% if message.tags == "success" %}
+            toastr.success("{{ message|linebreaksbr }}")
+        {% endif %}
+    {% endfor %}
+    htmx.on("messages", (event) => {
+      console.log(event.detail.value)
+      
+    })
+
+</script>
