@@ -2201,6 +2201,9 @@ def topic_form(request, topic_id=None):
             )
         else:
             topic.delete()
+            messages.add_message(
+                request, messages.SUCCESS, _("Topic deleted"),
+            )
             return HttpResponse("")
     elif request.method == "POST":
         form = journal_forms.TopicForm(request.POST, instance=topic)
@@ -2208,7 +2211,7 @@ def topic_form(request, topic_id=None):
             topic = form.save(commit=False)
             topic.journal = request.journal
             topic.save()
-            messages.add_message(request, messages.INFO, 'Changes saved.')
+            messages.add_message(request, messages.INFO, 'Saved.')
             return redirect(reverse(
                 "core_manager_topic", kwargs={"topic_id": topic.id}
             ))

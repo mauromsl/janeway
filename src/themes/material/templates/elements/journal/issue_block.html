@@ -1,7 +1,7 @@
 {% load i18n %}
 
-{% regroup articles by section as grouped_articles %}
-{% for section, section_articles in grouped_articles %}
+{% regroup articles by section as section_article_group %}
+{% for section, section_articles in section_article_group %}
     <h2 class="em">
         {% if section.plural and section_articles|length >= 2 %}
             {{ section.plural }}
@@ -9,7 +9,14 @@
             {{ section.name }}
         {% endif %}
     </h2>
-    {% for article in section_articles %}
-        {% include "elements/article_listing.html" with article=article %}
+
+    {% regroup section_articles by topic as topic_article_group %}
+    {% for topic, topic_articles in topic_article_group %}
+    {% if topic %} {# Unlike sections, topics are optional #}
+    <h3>{{ topic.title }}</h3>
+     {% endif %}
+       {% for article in topic_articles %}
+         {% include "elements/article_listing.html" with article=article %}
+       {% endfor %}
     {% endfor %}
 {% endfor %}

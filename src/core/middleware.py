@@ -3,6 +3,7 @@ __author__ = "Martin Paul Eve & Andy Byers"
 __license__ = "AGPL v3"
 __maintainer__ = "Birkbeck Centre for Technology and Publishing"
 
+import json
 from uuid import uuid4
 import threading
 
@@ -15,6 +16,10 @@ from django.shortcuts import redirect
 from django.conf import settings
 from django.urls import set_script_prefix
 from django.utils import timezone
+from django.contrib import messages
+from django.http import HttpRequest, HttpResponse
+from django.utils.deprecation import MiddlewareMixin
+from django.utils.translation import gettext_lazy as _
 
 from press import models as press_models
 from utils import setting_handler
@@ -242,3 +247,54 @@ class TimezoneMiddleware(BaseMiddleware):
                 logger.debug("Activated timezone %s" % tzname)
         except Exception as e:
             logger.warning("Failed to activate timezone %s: %s" % (tzname, e))
+
+class HtmxMessageMiddleware(MiddlewareMixin):
+    """
+    Middleware that moves messages into the HX-Trigger header when request is made with HTMX
+    """
+
+    def process_response(self, request, response):
+
+        # The HX-Request header indicates that the request was made with HTMX
+        if "HX-Request" not in request.headers:
+            return response
+
+        # Ignore redirections because HTMX cannot read the headers
+        if 300 <= response.status_code < 400:
+            return response
+
+        # Add a message for 500 errors
+        if response.status_code == 500:
+            messages.add_message(
+                request, messages.ERROR,
+                _("Something went wrong: Server Error")
+            )
+
+        # Extract the messages
+        messages = [
+            {"message": message.message, "tags": message.tags}
+            for message in get_messages(request)
+        ]
+        if not messages:
+            return response
+
+        # Get the existing HX-Trigger that could have been defined by the view
+        hx_trigger = response.headers.get("HX-Trigger")
+
+        if hx_trigger is None:
+            # If the HX-Trigger is not set, start with an empty object
+            hx_trigger = {}
+        elif hx_trigger.startswith("{"):
+            # If the HX-Trigger is JSON encoded, decode it
+            hx_trigger = json.loads(hx_trigger)
+        else:
+            # If the HX-Trigger uses a string, move it into a dict
+            hx_trigger = {hx_trigger: True}
+
+        # Add the messages array in the HX-Trigger object
+        hx_trigger["messages"] = messages
+
+        # Add or update the HX-Trigger
+        response.headers["HX-Trigger"] = json.dumps(hx_trigger)
+
+        return response

@@ -933,6 +933,11 @@ class Issue(AbstractLastModifiedModel):
             issue=Value(self.pk),
         ).values_list("order")
 
+        topic_order_subquery = TopicOrdering.objects.filter(
+            topic=OuterRef("topic__pk"),
+            issue=Value(self.pk)
+        ).values_list("order")
+
         article_order_subquery = ArticleOrdering.objects.filter(
             section=OuterRef("section__pk"),
             article=OuterRef("pk"),
@@ -945,13 +950,17 @@ class Issue(AbstractLastModifiedModel):
             'manuscript_files',
         ).select_related(
             'section',
+            'topic',
         ).annotate(
             section_order=Subquery(section_order_subquery),
+            topic_order=Subquery(topic_order_subquery),
             article_order=Subquery(article_order_subquery),
         ).order_by(
             "section_order",
             "section__sequence",
             "section__pk",
+            "topic_order",
+            "topic__pk",
             "article_order",
         )
 
