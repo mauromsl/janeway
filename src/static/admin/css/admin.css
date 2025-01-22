@@ -952,3 +952,12 @@ ul.menu {
   border: 1px solid var(--clr-orcid);
   background-color: var(--clr-orcid-light);
 }
+
+.auth-form-grid {
+  justify-content: center;
+}
+.auth-form-card {
+  padding-inline: 2rem;
+  padding-block: 1rem;
+  min-width: 22rem;
+}

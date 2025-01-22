@@ -1,4 +1,4 @@
-{% extends "admin/core/large_form.html" %}
+{% extends "admin/core/small_form.html" %}
 {% load i18n foundation %}
 
 {% block contextual_title %}
@@ -6,15 +6,14 @@
 {% endblock contextual_title %}
 
 {% block breadcrumbs %}
-  {{ block.super }}
-  <li>{% trans "Register for an account" %}</li>
 {% endblock breadcrumbs %}
 
 {% block title-section %}
-  {% trans "Register for an account" %}
 {% endblock %}
 
 {% block form_content %}
+  <h1 class="text-center"> {% trans "Register for an account" %}</h1>
+  <br />
   {% include "admin/elements/forms/messages_in_callout.html" with form=form %}
   <div class="flex wrap gap-1">
     {% include "common/elements/orcid_registration.html" with button_classes="button orcid-button" %}
@@ -62,6 +61,11 @@
     <button type="submit" class="button secondary">
       {% trans "Register" %}
     </button>
+  </div>
+  <div class="float-right">
+    <a type="submit" class="" href="{% url 'core_login' %}">
+      <i class="fa fa-arrow-left"></i> {% trans "Back to login page" %}
+    </a>
   </div>
   {% include "admin/elements/forms/denotes_required.html" %}
   {% include "admin/core/accounts/password_guide.html" %}

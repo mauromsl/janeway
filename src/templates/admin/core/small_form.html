@@ -14,16 +14,15 @@
 {% endblock breadcrumbs %}
 
 {% block body %}
-  <div class="grid">
-    <div class="max-w-24 padding-block-1">
+  <div class="grid auth-form-grid">
       <form method="POST">
         {% csrf_token %}
-        <div class="card padding-block-2 padding-inline-2">
+        {% include "admin/elements/forms/messages_in_callout.html" %}
+        <div class="card auth-form-card">
           {% block form_content %}
           {% endblock form_content %}
         </div>
       </form>
-    </div>
   </div>
 {% endblock body %}
 

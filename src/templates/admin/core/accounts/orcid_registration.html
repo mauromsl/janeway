@@ -6,15 +6,13 @@
 {% endblock contextual_title %}
 
 {% block breadcrumbs %}
-  {{ block.super }}
-  <li>{% trans "Unregistered ORCiD" %}</li>
 {% endblock breadcrumbs %}
 
 {% block title-section %}
-  {% trans "Unregistered ORCiD" %}
 {% endblock %}
 
 {% block form_content %}
+<h1 class="text-center"> {% trans "Complete registration with ORCID" %} </h1>
   {% include "admin/elements/forms/messages_in_callout.html" with form=form %}
   <p>{% blocktrans %}
     The ORCiD you logged in with is not currently linked with an
