@@ -1035,7 +1035,7 @@ def do_review(request, assignment_id):
 
         if form.is_valid() and decision_form.is_valid():
             decision_form.save()
-            assignment.save_review_form(form, assignment)
+            assignment.save_review_form(form, assignment, request.FILES)
             if "save_progress" in request.POST:
                 messages.add_message(
                     request,
@@ -3341,3 +3341,12 @@ def reviewer_shared_review_download(request, article_id, review_id):
             )
 
     raise Http404("You do not have permission to download this file.")
+
+
+def review_attachment_download(request, assignment_id, file_uuid):
+    answer_file = get_object_or_404(
+        models.ReviewFormAssignmentAnswerFile,
+        answer__assignment__id=assignment_id,
+        file__uuid_filename=file_uuid)
+
+    return files.serve_file_to_browser(answer_file.file_path, answer_file.file)
